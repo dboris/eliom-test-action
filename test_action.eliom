@@ -5,10 +5,10 @@ let main_service =
     ()
 
 let connect_service =
-  Eliom_service.create_attached_get
+  Eliom_service.create_attached_post
     ~name:"connect"
     ~fallback:main_service
-    ~get_params:(Eliom_parameter.string "name")
+    ~post_params:(Eliom_parameter.string "name")
     ()
 
 let () =
@@ -26,8 +26,12 @@ let () =
           ~css:[["css";"test_action.css"]]
           Eliom_content.Html.F.(body [
             h1 [txt @@ "Welcome " ^ name];
-            a ~service:connect_service [txt "Connect"] "John"
+            Form.post_form
+              ~service:connect_service
+              (fun param ->
+                [ Form.input ~input_type:`Text ~name:param Form.string ])
+              ()
           ])));
   Eliom_registration.Action.register
     ~service:connect_service
-    (fun name () -> Eliom_reference.set username (Some name))
+    (fun () name -> Eliom_reference.set username (Some name))
